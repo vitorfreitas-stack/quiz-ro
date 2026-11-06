@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Interativo - Registro de Ocorrências | EvoluServices</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Space Grotesk"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              dark: '#091926',
+              teal: '#00a3c4',
+              accent: '#0284c7',
+              navy: '#0b1d30',
+              surface: '#f8fafc',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#091926] text-slate-800 font-sans min-h-screen flex flex-col justify-between selection:bg-brand-teal selection:text-white">
+
+  <!-- Cabeçalho Institucional -->
+  <header class="border-b border-slate-800 bg-[#06121d]/80 backdrop-blur sticky top-0 z-30 px-4 py-3 sm:px-8">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-accent to-brand-teal flex items-center justify-center text-white shadow-md">
+          <i class="fa-solid fa-shield-halved text-base"></i>
+        </div>
+        <div>
+          <h1 class="font-display font-bold text-white text-base tracking-wide flex items-center gap-2">
+            EvoluServices <span class="text-brand-teal text-xs font-mono font-medium px-2 py-0.5 rounded bg-brand-teal/10 border border-brand-teal/20">Prevenção à Fraude</span>
+          </h1>
+          <p class="text-xs text-slate-400">Quiz de Fixação • Manual de Registro de Ocorrências</p>
+        </div>
+      </div>
+      
+      <!-- Alternador de Visão (Participante / Painel do Apresentador) -->
+      <div class="flex items-center space-x-2">
+        <button id="btn-toggle-dashboard" onclick="toggleDashboard()" class="text-xs text-slate-300 hover:text-white border border-slate-700 hover:border-brand-teal px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors bg-slate-900/60">
+          <i class="fa-solid fa-chart-pie text-brand-teal"></i>
+          <span id="dashboard-btn-text">Painel do Instrutor</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container Principal -->
+  <main class="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden relative">
+
+      <!-- ================= TELA 1: IDENTIFICAÇÃO / BOAS-VINDAS ================= -->
+      <section id="step-intro" class="p-6 sm:p-10 space-y-6">
+        <div class="space-y-2">
+          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-accent tracking-wider uppercase bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+            <i class="fa-solid fa-graduation-cap"></i> Avaliação Prática
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold font-display text-slate-900">
+            Valide seu conhecimento sobre o R.O.
+          </h2>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            São <strong>5 questões rápidas</strong> de múltipla escolha baseadas nas regras mandatórias do nosso manual no Pipefy. Você pode participar com seu nome ou de forma 100% anônima.
+          </p>
+        </div>
+
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-4">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i class="fa-solid fa-user-shield text-brand-accent"></i> Como deseja se identificar?
+          </h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-brand-accent transition-all has-[:checked]:border-brand-accent has-[:checked]:bg-sky-50/50 has-[:checked]:ring-1 has-[:checked]:ring-brand-accent">
+              <input type="radio" name="anon_mode" value="named" checked onchange="toggleIdentityInputs(true)" class="accent-brand-accent text-brand-accent">
+              <div>
+                <p class="text-xs font-bold text-slate-800">Quero me identificar</p>
+                <p class="text-[11px] text-slate-500">Nome e/ou e-mail corporativo</p>
+              </div>
+            </label>
+
+            <label class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-brand-accent transition-all has-[:checked]:border-brand-accent has-[:checked]:bg-sky-50/50 has-[:checked]:ring-1 has-[:checked]:ring-brand-accent">
+              <input type="radio" name="anon_mode" value="anonymous" onchange="toggleIdentityInputs(false)" class="accent-brand-accent text-brand-accent">
+              <div>
+                <p class="text-xs font-bold text-slate-800">Responder Anônimo</p>
+                <p class="text-[11px] text-slate-500">Privacidade total de dados</p>
+              </div>
+            </label>
+          </div>
+
+          <!-- Campos de Nome/Segmento -->
+          <div id="identity-fields" class="space-y-3 pt-2">
+            <div>
+              <label for="participant-name" class="block text-xs font-semibold text-slate-700 mb-1">Seu Nome ou Apelido</label>
+              <input type="text" id="participant-name" placeholder="Ex: Lucas Silva" class="w-full text-sm px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 transition-all">
+            </div>
+            <div>
+              <label for="participant-role" class="block text-xs font-semibold text-slate-700 mb-1">Segmento / Squad (Opcional)</label>
+              <input type="text" id="participant-role" placeholder="Ex: Saúde / Finpet / Análise Transacional" class="w-full text-sm px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 transition-all">
+            </div>
+          </div>
+        </div>
+
+        <button onclick="startQuiz()" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-brand-accent to-brand-teal text-white font-bold text-sm tracking-wide shadow-lg shadow-sky-600/20 hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+          <span>Iniciar Quiz</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </section>
+
+      <!-- ================= TELA 2: QUESTIONÁRIO INTERATIVO ================= -->
+      <section id="step-quiz" class="hidden p-6 sm:p-10 space-y-6">
+        <!-- Barra de Progresso Superior -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center text-xs text-slate-500">
+            <span class="font-bold text-brand-accent flex items-center gap-1.5">
+              <i class="fa-solid fa-list-check"></i> Pergunta <span id="current-q-index">1</span> de 5
+            </span>
+            <span id="badge-participant-tag" class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium text-[11px]">Identificado</span>
+          </div>
+          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-brand-accent to-brand-teal w-1/5 transition-all duration-300"></div>
+          </div>
+        </div>
+
+        <!-- Enunciado Dinâmico -->
+        <div class="space-y-2">
+          <span id="question-category" class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Classificação & Diretrizes</span>
+          <h3 id="question-text" class="text-lg sm:text-xl font-bold text-slate-900 leading-snug min-h-[56px] flex items-center"></h3>
+        </div>
+
+        <!-- Alternativas -->
+        <div id="options-container" class="space-y-2.5"></div>
+
+        <!-- Navegação de Perguntas -->
+        <div class="pt-4 flex items-center justify-between border-t border-slate-100">
+          <button id="btn-prev-question" onclick="prevQuestion()" class="text-xs font-semibold text-slate-400 hover:text-slate-600 px-3 py-2 rounded-lg transition-colors flex items-center gap-1 invisible">
+            <i class="fa-solid fa-arrow-left"></i> Anterior
+          </button>
+          
+          <button id="btn-next-question" onclick="nextQuestion()" disabled class="py-2.5 px-6 rounded-xl bg-brand-accent text-white font-bold text-xs shadow-md shadow-sky-600/20 hover:brightness-105 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2">
+            <span id="next-btn-label">Próxima Questão</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= TELA 3: RESULTADO INDIVIDUAL ================= -->
+      <section id="step-result" class="hidden p-6 sm:p-10 space-y-6">
+        <div class="text-center space-y-3">
+          <div id="result-icon-container" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl shadow-lg"></div>
+          <h2 id="result-title" class="text-2xl font-bold text-slate-900 font-display"></h2>
+          <p id="result-subtitle" class="text-sm text-slate-600 max-w-md mx-auto"></p>
+        </div>
+
+        <!-- Placar -->
+        <div class="grid grid-cols-2 gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
+          <div>
+            <p class="text-xs text-slate-500 font-medium">Acertos</p>
+            <p id="score-hits" class="text-2xl font-extrabold text-brand-accent">0/5</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 font-medium">Aproveitamento</p>
+            <p id="score-percent" class="text-2xl font-extrabold text-slate-800">0%</p>
+          </div>
+        </div>
+
+        <!-- Revisão do Gabarito com Justificativas -->
+        <div class="space-y-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+            <span>Gabarito Comentado</span>
+            <span class="text-[11px] text-slate-400 font-normal">Baseado no Manual v01</span>
+          </h3>
+          <div id="feedback-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 text-xs"></div>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button onclick="restartQuiz()" class="flex-1 py-3 px-4 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-50 transition-colors flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-rotate-right"></i> Refazer Quiz
+          </button>
+          <button onclick="toggleDashboard(true)" class="flex-1 py-3 px-4 rounded-xl bg-brand-dark text-white font-bold text-xs hover:bg-brand-navy transition-colors flex items-center justify-center gap-1.5 shadow-md">
+            <i class="fa-solid fa-chart-column text-brand-teal"></i> Ver Respostas Locais
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= TELA 4: PAINEL DO INSTRUTOR ================= -->
+      <section id="step-dashboard" class="hidden p-6 sm:p-8 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <h2 class="text-xl font-bold font-display text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-user text-brand-accent"></i> Painel Local do Dispositivo
+            </h2>
+            <p class="text-xs text-slate-500">Respostas salvas neste navegador (Para ver todos, consulte o Google Sheets)</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="exportToCSV()" class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition-colors flex items-center gap-1.5">
+              <i class="fa-solid fa-file-csv"></i> Exportar Dados
+            </button>
+            <button onclick="clearAllData()" class="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold hover:bg-rose-100 transition-colors flex items-center gap-1.5">
+              <i class="fa-solid fa-trash-can"></i> Limpar
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
+            <p class="text-[11px] text-slate-500 font-medium">Participantes</p>
+            <p id="dash-total-submissions" class="text-xl font-bold text-slate-800">0</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
+            <p class="text-[11px] text-slate-500 font-medium">Média de Acertos</p>
+            <p id="dash-average-score" class="text-xl font-bold text-brand-accent">0.0 / 5</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
+            <p class="text-[11px] text-slate-500 font-medium">Identificados</p>
+            <p id="dash-ident-count" class="text-xl font-bold text-emerald-600">0</p>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="text-xs font-bold uppercase text-slate-500 flex justify-between">
+            <span>Envios Registrados</span>
+            <span id="dash-records-count" class="text-slate-400 font-normal">0 registros</span>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold sticky top-0">
+                <tr>
+                  <th class="p-2.5">Data/Hora</th>
+                  <th class="p-2.5">Participante</th>
+                  <th class="p-2.5">Segmento</th>
+                  <th class="p-2.5 text-center">Nota</th>
+                  <th class="p-2.5 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="dash-table-body" class="divide-y divide-slate-100 font-normal text-slate-700"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <button onclick="toggleDashboard(false)" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-arrow-left"></i> Voltar ao Quiz
+        </button>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="py-4 text-center text-xs text-slate-500 border-t border-slate-800 bg-[#06121d]">
+    EvoluServices • Projeto Registro de Ocorrências • Treinamento de Prevenção à Fraude
+  </footer>
+
+  <!-- Modal Customizado -->
+  <div id="custom-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4 text-center">
+      <div id="modal-icon" class="w-12 h-12 rounded-full mx-auto flex items-center justify-center text-xl bg-sky-50 text-brand-accent">
+        <i class="fa-solid fa-circle-info"></i>
+      </div>
+      <div class="space-y-1">
+        <h4 id="modal-title" class="font-bold text-slate-900 text-base">Aviso</h4>
+        <p id="modal-message" class="text-xs text-slate-600 leading-relaxed"></p>
+      </div>
+      <div id="modal-actions" class="pt-2 flex gap-2">
+        <button onclick="closeModal()" class="w-full py-2.5 px-4 rounded-xl bg-brand-accent text-white font-bold text-xs hover:brightness-105 transition-all">
+          Entendi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // INTEGRAÇÃO COM GOOGLE SHEETS VIA APPS SCRIPT
+    // =========================================================================
+    const GOOGLE_SHEETS_WEBAPP_URL = "COLE_AQUI_O_SEU_LINK_DO_APPS_SCRIPT";
+
+    async function sendToGoogleSheets(payload) {
+      if (!GOOGLE_SHEETS_WEBAPP_URL || GOOGLE_SHEETS_WEBAPP_URL.includes("COLE_AQUI")) {
+        console.warn("URL do Google Sheets não foi configurada.");
+        return;
+      }
+
+      try {
+        await fetch(GOOGLE_SHEETS_WEBAPP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+        console.log("Dados sincronizados com o Google Sheets!");
+      } catch (err) {
+        console.error("Erro ao sincronizar dados com o Google Sheets:", err);
+      }
+    }
+
+    const quizQuestions = [
+      {
+        id: 1,
+        category: "Conformidade & Regulação",
+        question: "Em quais situações é OBRIGATÓRIO realizar a notificação da equipe de Compliance via template no Pipefy?",
+        options: [
+          { text: "Apenas em suspeitas ou pedidos de falência decretada", correct: false },
+          { text: "Exclusivamente nos casos de Suspeita de Fraude, Fraude Confirmada, PLD e PFT", correct: true },
+          { text: "Em toda e qualquer transação de chargeback independentemente do risco", correct: false },
+          { text: "Somente quando houver cancelamento de vendas acima de R$ 50.000,00", correct: false }
+        ],
+        explanation: "Conforme o item 7.7 do Manual, independentemente da origem (Transacional ou Cadastral), a notificação ao Compliance é obrigatória exclusivamente para Suspeita de Fraude, Fraude Confirmada, PLD e PFT."
+      },
+      {
+        id: 2,
+        category: "Rigor Analítico & Auditoria",
+        question: "Sobre a inclusão de evidências no card do Pipefy, qual é a diretriz oficial estabelecida pelo manual?",
+        options: [
+          { text: "É facultativa, sendo suficiente descrever brevemente a opinião do analista", correct: false },
+          { text: "Obrigatória apenas quando solicitada expressamente pelo cliente", correct: false },
+          { text: "É fundamental anexar comprovantes, relatórios e documentos que corroborem e justifiquem a decisão", correct: true },
+          { text: "Basta anexar o comprovante caso o valor exceda o limite operacional do dia", correct: false }
+        ],
+        explanation: "O item 5 (Aspectos das Análises) e 7.6 exigem clareza, objetividade e o upload obrigatório de evidências que respaldem auditorias e a tomada de decisão."
+      },
+      {
+        id: 3,
+        category: "Arquitetura de Processos (Pipes)",
+        question: "Qual pipe do Pipefy possui integração de 'Via Dupla' (bidirecional) com o Registro de Ocorrências?",
+        options: [
+          { text: "Análise de Transação", correct: false },
+          { text: "Cancelamento de Vendas", correct: true },
+          { text: "Descredenciamento de Estabelecimentos", correct: false },
+          { text: "Venda Contestada / Chargeback", correct: false }
+        ],
+        explanation: "Conforme a tabela de conexões (item 6), o Pipe de Cancelamento opera em Via Dupla para efetuar e confirmar a solicitação de cancelamento entre as áreas."
+      },
+      {
+        id: 4,
+        category: "Métricas Financeiras",
+        question: "Como o manual define o campo 'Prejuízo Evitado' durante a abertura da análise?",
+        options: [
+          { text: "O valor total de todas as vendas aprovadas pelo credenciado no último mês", correct: false },
+          { text: "O valor em reais que foi bloqueado ou cancelado preventivamente antes da efetivação da perda", correct: true },
+          { text: "A multa regulatória calculada caso o BACEN aplique punição à empresa", correct: false },
+          { text: "O montante total acumulado de chargebacks sofridos nos últimos 12 meses", correct: false }
+        ],
+        explanation: "No item 7.5, Prejuízo Evitado é expressamente conceituado como o valor financeiro bloqueado/preservado antes que a perda ocorra."
+      },
+      {
+        id: 5,
+        category: "Tipos de Análise",
+        question: "Ao selecionar o tipo de análise 'Cadastral' no Pipefy, qual é a principal particularidade do formulário?",
+        options: [
+          { text: "Exige obrigatoriamente data da transação e identificador único da venda", correct: false },
+          { text: "Gera o cancelamento financeiro automático em menos de 2 horas", correct: false },
+          { text: "Não contemplará dados transacionais específicos, focando nas informações do estabelecimento", correct: true },
+          { text: "Dispensa a avaliação de participação do estabelecimento", correct: false }
+        ],
+        explanation: "De acordo com o item 7.2 do manual, caso o tipo Cadastral seja selecionado, o formulário não exige preenchimento de campos de transação específica."
+      }
+    ];
+
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
+    let participantInfo = { isAnonymous: false, name: "", role: "" };
+
+    const STORAGE_KEY = "evolu_ro_quiz_records_v1";
+
+    function getSavedSubmissions() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveSubmission(record) {
+      const records = getSavedSubmissions();
+      records.push(record);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+      } catch (e) {
+        console.warn("Armazenamento local indisponível");
+      }
+    }
+
+    function toggleIdentityInputs(show) {
+      const fields = document.getElementById("identity-fields");
+      if (show) fields.classList.remove("hidden");
+      else fields.classList.add("hidden");
+    }
+
+    function startQuiz() {
+      const isAnon = document.querySelector('input[name="anon_mode"]:checked').value === "anonymous";
+      const nameInput = document.getElementById("participant-name").value.trim();
+      const roleInput = document.getElementById("participant-role").value.trim();
+
+      if (!isAnon && nameInput.length < 2) {
+        showModal("Identificação Requerida", "Por favor, digite seu nome ou selecione a opção de 'Responder Anônimo' para continuar.");
+        return;
+      }
+
+      participantInfo = {
+        isAnonymous: isAnon,
+        name: isAnon ? "Anônimo" : nameInput,
+        role: roleInput || (isAnon ? "Geral" : "Equipe")
+      };
+
+      const badge = document.getElementById("badge-participant-tag");
+      if (isAnon) {
+        badge.textContent = "Anônimo";
+        badge.className = "px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-medium text-[11px] border border-amber-200";
+      } else {
+        badge.textContent = participantInfo.name;
+        badge.className = "px-2 py-0.5 rounded bg-sky-50 text-brand-accent font-medium text-[11px] border border-sky-200";
+      }
+
+      currentQuestionIndex = 0;
+      userAnswers = {};
+
+      document.getElementById("step-intro").classList.add("hidden");
+      document.getElementById("step-quiz").classList.remove("hidden");
+      document.getElementById("step-result").classList.add("hidden");
+      document.getElementById("step-dashboard").classList.add("hidden");
+
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = quizQuestions[currentQuestionIndex];
+      const total = quizQuestions.length;
+
+      document.getElementById("current-q-index").textContent = (currentQuestionIndex + 1);
+      document.getElementById("question-category").textContent = q.category;
+      document.getElementById("question-text").textContent = q.question;
+
+      const progressPercent = ((currentQuestionIndex + 1) / total) * 100;
+      document.getElementById("quiz-progress-bar").style.width = progressPercent + "%";
+
+      const prevBtn = document.getElementById("btn-prev-question");
+      if (currentQuestionIndex > 0) prevBtn.classList.remove("invisible");
+      else prevBtn.classList.add("invisible");
+
+      const nextBtnLabel = document.getElementById("next-btn-label");
+      if (currentQuestionIndex === total - 1) {
+        nextBtnLabel.textContent = "Concluir & Ver Resultado";
+      } else {
+        nextBtnLabel.textContent = "Próxima Questão";
+      }
+
+      const container = document.getElementById("options-container");
+      container.innerHTML = "";
+
+      const selectedOption = userAnswers[q.id];
+
+      q.options.forEach((opt, idx) => {
+        const isChecked = selectedOption === idx;
+        const letter = String.fromCharCode(65 + idx);
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.onclick = () => selectOption(q.id, idx);
+        btn.className = `w-full text-left p-3.5 sm:p-4 rounded-xl border transition-all flex items-start gap-3 group ${
+          isChecked 
+            ? "border-brand-accent bg-sky-50/80 ring-2 ring-brand-accent/30 shadow-sm" 
+            : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+        }`;
+
+        btn.innerHTML = `
+          <span class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold transition-colors ${
+            isChecked 
+              ? "bg-brand-accent text-white" 
+              : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
+          }">${letter}</span>
+          <span class="text-xs sm:text-sm font-medium text-slate-700 leading-snug flex-1">${opt.text}</span>
+          ${isChecked ? '<i class="fa-solid fa-circle-check text-brand-accent text-sm mt-0.5"></i>' : ''}
+        `;
+        container.appendChild(btn);
+      });
+
+      const nextBtn = document.getElementById("btn-next-question");
+      nextBtn.disabled = selectedOption === undefined;
+    }
+
+    function selectOption(qId, optionIndex) {
+      userAnswers[qId] = optionIndex;
+      renderQuestion();
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIndex < quizQuestions.length - 1) {
+        currentQuestionIndex++;
+        renderQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function finishQuiz() {
+      let hits = 0;
+      const total = quizQuestions.length;
+      const answersDetailed = [];
+
+      quizQuestions.forEach(q => {
+        const chosenIndex = userAnswers[q.id];
+        const isCorrect = q.options[chosenIndex]?.correct || false;
+        if (isCorrect) hits++;
+
+        answersDetailed.push({
+          questionId: q.id,
+          question: q.question,
+          chosenAnswer: q.options[chosenIndex]?.text || "Sem resposta",
+          correctAnswer: q.options.find(o => o.correct)?.text,
+          isCorrect: isCorrect
+        });
+      });
+
+      const percentage = Math.round((hits / total) * 100);
+
+      const record = {
+        id: "RO-" + Date.now().toString().slice(-6),
+        timestamp: new Date().toLocaleString("pt-BR"),
+        isAnonymous: participantInfo.isAnonymous,
+        name: participantInfo.name,
+        role: participantInfo.role,
+        score: hits,
+        total: total,
+        percentage: percentage,
+        details: answersDetailed
+      };
+
+      saveSubmission(record);
+
+      sendToGoogleSheets({
+        id: record.id,
+        timestamp: record.timestamp,
+        isAnonymous: record.isAnonymous ? "Sim" : "Não",
+        nome: record.name,
+        segmento: record.role,
+        score: hits,
+        total: total,
+        percentual: percentage
+      });
+
+      document.getElementById("step-quiz").classList.add("hidden");
+      document.getElementById("step-result").classList.remove("hidden");
+
+      document.getElementById("score-hits").textContent = `${hits}/${total}`;
+      document.getElementById("score-percent").textContent = `${percentage}%`;
+
+      const iconContainer = document.getElementById("result-icon-container");
+      const title = document.getElementById("result-title");
+      const subtitle = document.getElementById("result-subtitle");
+
+      if (hits === 5) {
+        iconContainer.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl shadow-lg bg-emerald-100 text-emerald-600";
+        iconContainer.innerHTML = '<i class="fa-solid fa-award"></i>';
+        title.textContent = "Excelente! Domínio Completo!";
+        subtitle.textContent = "Você compreendeu com precisão todas as diretrizes e regras do Manual de Registro de Ocorrências.";
+      } else if (hits >= 3) {
+        iconContainer.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl shadow-lg bg-sky-100 text-brand-accent";
+        iconContainer.innerHTML = '<i class="fa-solid fa-thumbs-up"></i>';
+        title.textContent = "Bom Desempenho!";
+        subtitle.textContent = "Você conhece a maior parte dos procedimentos, com pequenos pontos de atenção para reforçar no manual.";
+      } else {
+        iconContainer.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl shadow-lg bg-amber-100 text-amber-600";
+        iconContainer.innerHTML = '<i class="fa-solid fa-book-open-reader"></i>';
+        title.textContent = "Hora de Revisar o Manual";
+        subtitle.textContent = "Alguns conceitos cruciais de Compliance e preenchimento precisam de mais atenção para proteger a esteira.";
+      }
+
+      const feedbackList = document.getElementById("feedback-list");
+      feedbackList.innerHTML = "";
+
+      quizQuestions.forEach((q, idx) => {
+        const chosenIdx = userAnswers[q.id];
+        const isCorrect = q.options[chosenIdx]?.correct;
+        const item = document.createElement("div");
+        item.className = `p-3 rounded-xl border ${isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'}`;
+
+        item.innerHTML = `
+          <div class="flex items-start justify-between gap-2 mb-1">
+            <span class="font-bold text-slate-800">Q${idx + 1}. ${q.question}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${isCorrect ? 'Correta' : 'Incorreta'}
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-600 mb-1"><strong>Sua resposta:</strong> ${q.options[chosenIdx]?.text}</p>
+          ${!isCorrect ? `<p class="text-[11px] text-emerald-700 mb-1"><strong>Correta:</strong> ${q.options.find(o => o.correct)?.text}</p>` : ''}
+          <p class="text-[10px] text-slate-500 italic border-t border-slate-200/60 pt-1 mt-1">${q.explanation}</p>
+        `;
+        feedbackList.appendChild(item);
+      });
+    }
+
+    function restartQuiz() {
+      currentQuestionIndex = 0;
+      userAnswers = {};
+      document.getElementById("step-result").classList.add("hidden");
+      document.getElementById("step-intro").classList.remove("hidden");
+    }
+
+    function toggleDashboard(forceOpen = null) {
+      const dashView = document.getElementById("step-dashboard");
+      const introView = document.getElementById("step-intro");
+      const quizView = document.getElementById("step-quiz");
+      const resultView = document.getElementById("step-result");
+      const btnText = document.getElementById("dashboard-btn-text");
+
+      const isCurrentlyOpen = !dashView.classList.contains("hidden");
+      const shouldOpen = forceOpen !== null ? forceOpen : !isCurrentlyOpen;
+
+      if (shouldOpen) {
+        dashView.classList.remove("hidden");
+        introView.classList.add("hidden");
+        quizView.classList.add("hidden");
+        resultView.classList.add("hidden");
+        btnText.textContent = "Voltar ao Início";
+        loadDashboardData();
+      } else {
+        dashView.classList.add("hidden");
+        introView.classList.remove("hidden");
+        btnText.textContent = "Painel do Instrutor";
+      }
+    }
+
+    function loadDashboardData() {
+      const records = getSavedSubmissions();
+
+      document.getElementById("dash-total-submissions").textContent = records.length;
+      document.getElementById("dash-records-count").textContent = `${records.length} respostas`;
+
+      if (records.length === 0) {
+        document.getElementById("dash-average-score").textContent = "0.0 / 5";
+        document.getElementById("dash-ident-count").textContent = "0";
+        document.getElementById("dash-table-body").innerHTML = `
+          <tr>
+            <td colspan="5" class="p-6 text-center text-slate-400">
+              <i class="fa-regular fa-folder-open text-2xl mb-1 block"></i>
+              Nenhuma resposta registrada neste navegador. Se configurada, a planilha Sheets centraliza todas as respostas!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const totalScoreSum = records.reduce((acc, r) => acc + r.score, 0);
+      const avgScore = (totalScoreSum / records.length).toFixed(1);
+      document.getElementById("dash-average-score").textContent = `${avgScore} / 5`;
+
+      const identifiedCount = records.filter(r => !r.isAnonymous).length;
+      document.getElementById("dash-ident-count").textContent = `${identifiedCount} (${records.length - identifiedCount} anônimos)`;
+
+      const tbody = document.getElementById("dash-table-body");
+      tbody.innerHTML = "";
+
+      [...records].reverse().forEach(rec => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50 transition-colors";
+
+        const badgeClass = rec.percentage >= 80 
+          ? "bg-emerald-100 text-emerald-800" 
+          : rec.percentage >= 60 
+          ? "bg-sky-100 text-sky-800" 
+          : "bg-amber-100 text-amber-800";
+
+        tr.innerHTML = `
+          <td class="p-2.5 text-[11px] text-slate-500 whitespace-nowrap">${rec.timestamp}</td>
+          <td class="p-2.5 font-semibold text-slate-800 flex items-center gap-1.5">
+            ${rec.isAnonymous ? '<i class="fa-solid fa-user-secret text-slate-400"></i>' : '<i class="fa-solid fa-user-check text-brand-accent"></i>'}
+            ${rec.name}
+          </td>
+          <td class="p-2.5 text-slate-500 text-[11px]">${rec.role || '-'}</td>
+          <td class="p-2.5 text-center font-bold text-slate-800">${rec.score}/5</td>
+          <td class="p-2.5 text-center">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${rec.percentage}%</span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportToCSV() {
+      const records = getSavedSubmissions();
+      if (records.length === 0) {
+        showModal("Aviso", "Não há registros locais disponíveis para exportação no momento.");
+        return;
+      }
+
+      let csv = "ID;DataHora;Identificacao;Nome;Segmento;Pontuacao;Total;Aproveitamento
+";
+      records.forEach(r => {
+        csv += `"${r.id}";"${r.timestamp}";"${r.isAnonymous ? 'Anonimo' : 'Identificado'}";"${r.name}";"${r.role}";${r.score};${r.total};"${r.percentage}%"
+`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Quiz_Registro_Ocorrencias_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function clearAllData() {
+      const records = getSavedSubmissions();
+      if (records.length === 0) {
+        showModal("Aviso", "Não há registros para limpar.");
+        return;
+      }
+
+      showConfirmModal(
+        "Limpar Registros Locais",
+        "Tem certeza que deseja apagar as respostas salvas neste navegador?",
+        () => {
+          localStorage.removeItem(STORAGE_KEY);
+          loadDashboardData();
+          showModal("Sucesso", "Registros locais excluídos.");
+        }
+      );
+    }
+
+    function showModal(title, message) {
+      const modal = document.getElementById("custom-modal");
+      document.getElementById("modal-title").textContent = title;
+      document.getElementById("modal-message").textContent = message;
+      document.getElementById("modal-icon").innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+      document.getElementById("modal-icon").className = "w-12 h-12 rounded-full mx-auto flex items-center justify-center text-xl bg-sky-50 text-brand-accent";
+
+      const actions = document.getElementById("modal-actions");
+      actions.innerHTML = `
+        <button onclick="closeModal()" class="w-full py-2.5 px-4 rounded-xl bg-brand-accent text-white font-bold text-xs hover:brightness-105 transition-all">
+          Entendi
+        </button>
+      `;
+      modal.classList.remove("hidden");
+    }
+
+    function showConfirmModal(title, message, onConfirm) {
+      const modal = document.getElementById("custom-modal");
+      document.getElementById("modal-title").textContent = title;
+      document.getElementById("modal-message").textContent = message;
+      document.getElementById("modal-icon").innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+      document.getElementById("modal-icon").className = "w-12 h-12 rounded-full mx-auto flex items-center justify-center text-xl bg-rose-50 text-rose-600";
+
+      const actions = document.getElementById("modal-actions");
+      actions.innerHTML = `
+        <button onclick="closeModal()" class="flex-1 py-2.5 px-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-colors">
+          Cancelar
+        </button>
+        <button id="modal-confirm-btn" class="flex-1 py-2.5 px-3 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 transition-colors">
+          Sim, Limpar
+        </button>
+      `;
+
+      document.getElementById("modal-confirm-btn").onclick = () => {
+        closeModal();
+        if (onConfirm) onConfirm();
+      };
+
+      modal.classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("custom-modal").classList.add("hidden");
+    }
+  </script>
+</body>
+</html>
