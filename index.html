@@ -199,7 +199,7 @@
             <h2 class="text-xl font-bold font-display text-slate-900 flex items-center gap-2">
               <i class="fa-solid fa-clipboard-user text-brand-accent"></i> Painel Local do Dispositivo
             </h2>
-            <p class="text-xs text-slate-500">Respostas salvas neste navegador (Para ver todos, consulte o Google Sheets)</p>
+            <p class="text-xs text-slate-500">Respostas salvas neste navegador (Centralizadas no Google Sheets)</p>
           </div>
 
           <div class="flex items-center gap-2">
@@ -282,12 +282,12 @@
 
   <script>
     // =========================================================================
-    // INTEGRAÇÃO COM GOOGLE SHEETS VIA APPS SCRIPT
+    // INTEGRAÇÃO COM GOOGLE SHEETS VIA APPS SCRIPT (EVOLUSERVICES)
     // =========================================================================
-    const GOOGLE_SHEETS_WEBAPP_URL = "COLE_AQUI_O_SEU_LINK_DO_APPS_SCRIPT";
+    const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/a/macros/evoluservices.com/s/AKfycbw6JwmeEtsUG3gfEdcbx2ptFJ1jUGcEVtehY_SVOC1xjyAXdYtK5YvpOeibcAWzRHmTLg/exec";
 
     async function sendToGoogleSheets(payload) {
-      if (!GOOGLE_SHEETS_WEBAPP_URL || GOOGLE_SHEETS_WEBAPP_URL.includes("COLE_AQUI")) {
+      if (!GOOGLE_SHEETS_WEBAPP_URL) {
         console.warn("URL do Google Sheets não foi configurada.");
         return;
       }
@@ -655,7 +655,7 @@
           <tr>
             <td colspan="5" class="p-6 text-center text-slate-400">
               <i class="fa-regular fa-folder-open text-2xl mb-1 block"></i>
-              Nenhuma resposta registrada neste navegador. Se configurada, a planilha Sheets centraliza todas as respostas!
+              Nenhuma resposta registrada neste navegador. As respostas são salvas em tempo real no Google Sheets!
             </td>
           </tr>
         `;
@@ -705,11 +705,9 @@
         return;
       }
 
-      let csv = "ID;DataHora;Identificacao;Nome;Segmento;Pontuacao;Total;Aproveitamento
-";
+      let csv = "ID;DataHora;Identificacao;Nome;Segmento;Pontuacao;Total;Aproveitamento\n";
       records.forEach(r => {
-        csv += `"${r.id}";"${r.timestamp}";"${r.isAnonymous ? 'Anonimo' : 'Identificado'}";"${r.name}";"${r.role}";${r.score};${r.total};"${r.percentage}%"
-`;
+        csv += `"${r.id}";"${r.timestamp}";"${r.isAnonymous ? 'Anonimo' : 'Identificado'}";"${r.name}";"${r.role}";${r.score};${r.total};"${r.percentage}%"\n`;
       });
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -731,7 +729,7 @@
 
       showConfirmModal(
         "Limpar Registros Locais",
-        "Tem certeza que deseja apagar as respostas salvas neste navegador?",
+        "Tem certeza que deseja apagar as respostas salvas neste navegador? As respostas enviadas para o Google Sheets permanecem salvas.",
         () => {
           localStorage.removeItem(STORAGE_KEY);
           loadDashboardData();
